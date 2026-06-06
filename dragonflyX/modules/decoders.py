@@ -9,7 +9,6 @@ import re
 import urllib.parse
 from urllib.parse import urlparse
 
-
 type DecodingResult = tuple[str, str | None]
 
 KNOWN_SHORTENERS: frozenset[str] = frozenset({

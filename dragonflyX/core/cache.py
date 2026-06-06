@@ -19,10 +19,14 @@ TTL_MAP: dict[str, int] = {
     "urlscan":       1 * 3600,
     "urlscan_vt":    1 * 3600,
     "dns":          30 * 60,
+    "dns_subs":     30 * 60,
+    "phone_intel":  24 * 3600,
     "ip_intel":      1 * 3600,
     "url_analysis":  1 * 3600,
     "hash_check":    6 * 3600,
     "identity":      1 * 3600,
+    "dorks":         7 * 24 * 3600,
+    "leakcheck":    1 * 3600,
 }
 DEFAULT_TTL = 3600
 
@@ -65,7 +69,7 @@ class CacheManager:
             logger.debug(f"Cache hit: {key}")
             return value
         except Exception as e:
-            raise CacheError(key=key, operation="get", reason=str(e))
+            raise CacheError(key=key, operation="get", reason=str(e)) from e
 
     def set(self, key: str, value: dict, source: str) -> None:
         """
@@ -80,7 +84,7 @@ class CacheManager:
         try:
             self._cache.set(key, value, expire=ttl)
         except Exception as e:
-            raise CacheError(key=key, operation="set", reason=str(e))
+            raise CacheError(key=key, operation="set", reason=str(e)) from e
 
     def delete(self, key: str) -> None:
         """
@@ -92,7 +96,7 @@ class CacheManager:
         try:
             self._cache.delete(key)
         except Exception as e:
-            raise CacheError(key=key, operation="delete", reason=str(e))
+            raise CacheError(key=key, operation="delete", reason=str(e)) from e
 
     def clear_all(self) -> None:
         """Clear all cache entries."""

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field
 
@@ -22,7 +22,7 @@ class HashCheckResult(BaseModel):
 
     hash_value: str
     hash_type: str
-    query_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    query_time: datetime = Field(default_factory=lambda: datetime.now(UTC))
     risk_level: RiskLevel = "unknown"
     risk_score: int = 0
     file_type: str | None = None

@@ -208,6 +208,60 @@ DragonflyX/
 
 ---
 
+## Modules
+
+### dns_tools.py
+
+```
+Purpose : DNS lookup, WHOIS queries, and subdomain enumeration
+Library : dnspython, python-whois
+Result  : DNSResult (a, aaaa, mx, ns, txt, cname, soa,
+          whois, subdomains, errors)
+Subdomain : optional enumerate_subs=True parameter
+            SubdomainResult (hostname, ip_addresses, is_wildcard)
+            SUBDOMAIN_WORDLIST — 100 built-in prefixes
+            wildcard detection via random hostname resolution
+Cache   : dns (standard TTL), dns_subs (with enumeration, 30m TTL)
+API key : not required
+```
+
+### phone_intel.py
+
+```
+Purpose : offline phone number metadata extraction
+Library : phonenumbers (no network calls)
+Result  : PhoneIntelResult (formatted_e164, formatted_national,
+          country_code, country_name, carrier, line_type,
+          is_valid, is_possible)
+Cache   : phone_intel, TTL 24h
+API key : not required
+```
+
+### dorks_generator.py
+
+```
+Purpose : generate Google dork URLs for OSINT reconnaissance
+Library : stdlib only (no network calls, no API key)
+Result  : list[DorkResult] (category, description, query, url)
+Categories : IDENTITY, CREDENTIALS & LEAKS,
+            INFRASTRUCTURE, TECHNICAL EXPOSURE
+Cache   : dorks, TTL 7 days
+API key : not required
+```
+
+### paste_search.py
+
+```
+Purpose : search LeakCheck public API for breach data
+API     : leakcheck.io/api/public (no key required)
+Result  : list[PasteResult] (paste_id, url, date, size, tags)
+Cache   : leakcheck, TTL 1h
+Rate limit : leakcheck, semaphore=1, min_interval=3.0s
+API key : not required
+```
+
+---
+
 ## License
 
 [MIT License](LICENSE) · Built by [@0xTriSec](https://github.com/0xTriSec)

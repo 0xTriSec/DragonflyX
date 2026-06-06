@@ -1,13 +1,13 @@
 """VirusTotal provider for IP intelligence."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
+from dragonflyX.config import require_key
 from dragonflyX.core.cache import cache
 from dragonflyX.core.exceptions import APIError, APIKeyMissing, NetworkError, RateLimited
 from dragonflyX.core.http_client import HTTPClient
 from dragonflyX.core.logger import logger
 from dragonflyX.core.rate_limiter import rate_limiter
-from dragonflyX.config import require_key
 from dragonflyX.modules.ip_intel.schemas import VirusTotalIPResult
 
 
@@ -53,7 +53,7 @@ async def fetch(target: str, client: HTTPClient) -> VirusTotalIPResult | None:
         last_date = attrs.get("last_analysis_date")
         last_analysis_date = None
         if last_date:
-            last_analysis_date = datetime.fromtimestamp(last_date, tz=timezone.utc)
+            last_analysis_date = datetime.fromtimestamp(last_date, tz=UTC)
 
         result = VirusTotalIPResult(
             malicious=stats.get("malicious", 0),

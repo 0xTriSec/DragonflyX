@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
+import pyfiglet
 from rich import box as rich_box
 from rich.console import Console
 from rich.panel import Panel
 from rich.status import Status
 from rich.table import Table
 
-import pyfiglet
-
 from dragonflyX.core.exceptions import DragonflyXError
 from dragonflyX.modules.dns_tools import DNSResult
 from dragonflyX.modules.hash_check.schemas import HashCheckResult
 from dragonflyX.modules.identity import IdentityResult
 from dragonflyX.modules.ip_intel.schemas import IPIntelResult
+from dragonflyX.modules.phone_intel import PhoneIntelResult
 from dragonflyX.modules.url_analysis.schemas import URLAnalysisResult
 
 console = Console()
@@ -52,7 +52,7 @@ def show_banner() -> None:
     """Display the DragonflyX ASCII banner."""
     ascii_art = pyfiglet.figlet_format("DragonflyX", font="slant")
     console.print(ascii_art, style="bold cyan")
-    console.print("  OSINT  SOC  Intelligence  |  v1.0.0\n", style="dim cyan")
+    console.print("  OSINT  SOC  Intelligence  |  v2.0.0\n", style="dim cyan")
 
 
 def show_spinner(message: str) -> Status:
@@ -425,11 +425,156 @@ def display_dns_result(result: DNSResult) -> None:
         if lines:
             console.print(Panel("\n".join(lines), title="WHOIS", border_style="dim"))
 
+    if result.subdomains:
+        if any(item.is_wildcard for item in result.subdomains):
+            console.print("  Warning: wildcard DNS detected; some subdomain results may be generic", style="yellow")
+
+        t = Table(
+            title="Subdomain Results",
+            box=rich_box.ROUNDED,
+            show_header=True,
+            padding=(0, 1),
+        )
+        t.add_column("Hostname", style="cyan", min_width=20)
+        t.add_column("IP Addresses", min_width=20)
+        t.add_column("Wildcard", min_width=10)
+        for subdomain in result.subdomains:
+            ip_addresses = ", ".join(subdomain.ip_addresses) if subdomain.ip_addresses else "N/A"
+            wildcard = "Yes" if subdomain.is_wildcard else "No"
+            t.add_row(subdomain.hostname, ip_addresses, wildcard)
+        console.print(t)
+
     # --- Errors (chi hien thi neu co) ---
     if result.errors:
         error_lines = [f"- {err}" for err in result.errors]
         console.print(Panel("\n".join(error_lines), title="Errors", border_style="dim red"))
 
+    console.print()
+
+
+def display_phone_result(result: PhoneIntelResult) -> None:
+    """Display phone number intelligence results."""
+    console.print(Panel(result.phone_number, title="Phone Intel", border_style="cyan"))
+
+    t = Table(box=rich_box.ROUNDED, show_header=True, padding=(0, 1))
+    t.add_column("Field", style="bold", min_width=16)
+    t.add_column("Value", min_width=24)
+    t.add_row("E.164 Format", result.formatted_e164)
+    t.add_row("National Format", result.formatted_national)
+    t.add_row("Country", f"{result.country_name} ({result.country_code})")
+    t.add_row("Carrier", result.carrier or "Unknown")
+    t.add_row("Line Type", result.line_type)
+    t.add_row("Valid", "Yes" if result.is_valid else "No")
+    t.add_row("Possible", "Yes" if result.is_possible else "No")
+    console.print(t)
+
+    if not result.is_valid:
+        console.print("  Number is not valid — metadata may be incomplete", style="yellow")
+
+    if result.errors:
+        console.print()
+        for error in result.errors:
+            console.print(f"  {error}", style="dim red")
+
+    console.print()
+
+
+def display_dorks_result(results: list) -> None:
+    """Display generated dork queries grouped by category."""
+    from dragonflyX.modules.dorks_generator import DorkResult
+
+    if not results:
+        console.print(Panel(
+            "No dorks generated.",
+            title="Dorks Generator",
+            border_style="cyan",
+        ))
+        console.print()
+        return
+
+    target = results[0].query if results else ""
+    console.print(Panel(
+        f"{len(results)} dorks — {target}",
+        title="Dorks Generator",
+        border_style="cyan",
+    ))
+
+    grouped: dict[str, list[DorkResult]] = {}
+    for dork in results:
+        grouped.setdefault(dork.category, []).append(dork)
+
+    for category in ["IDENTITY", "CREDENTIALS & LEAKS", "INFRASTRUCTURE", "TECHNICAL EXPOSURE"]:
+        if category not in grouped:
+            continue
+        t = Table(
+            title=f"{category} ({len(grouped[category])})",
+            box=rich_box.ROUNDED,
+            show_header=True,
+            padding=(0, 1),
+        )
+        t.add_column("Query", style="cyan", min_width=45)
+        t.add_column("Description", min_width=35)
+
+        for dork in grouped[category]:
+            t.add_row(dork.query, dork.description)
+            console.print(f"  {dork.url}", style="dim")
+
+        console.print(t)
+
+    console.print(f"  {len(results)} dorks generated\n")
+
+
+def _fmt_size(n: int) -> str:
+    """Format bytes to human readable string."""
+    if n == 0:
+        return "N/A"
+    for unit in ["B", "KB", "MB", "GB"]:
+        if n < 1024:
+            return f"{n:.1f} {unit}"
+        n /= 1024
+    return f"{n:.1f} TB"
+
+
+def display_paste_result(results: list) -> None:
+    """Display paste search results."""
+
+    if not results:
+        console.print(Panel(
+            "No pastes found.",
+            title="Paste Search",
+            border_style="yellow",
+        ))
+        console.print()
+        return
+
+    console.print(Panel(
+        f"{len(results)} paste(s) found",
+        title="Paste Search",
+        border_style="yellow",
+    ))
+
+    t = Table(
+        title="Results",
+        box=rich_box.ROUNDED,
+        show_header=True,
+        padding=(0, 1),
+    )
+    t.add_column("ID", style="cyan", min_width=14, max_width=14)
+    t.add_column("Date", min_width=19)
+    t.add_column("Size", min_width=8, justify="right")
+    t.add_column("Tags", min_width=20)
+    t.add_column("URL", style="dim", min_width=35)
+
+    for paste in results:
+        paste_id_str = paste.paste_id[:12]
+        date_str = paste.date[:19].replace("T", " ") if paste.date else "N/A"
+        size_str = _fmt_size(paste.size)
+        tags_str = ", ".join(paste.tags[:3]) if paste.tags else "N/A"
+        url_str = paste.url[:50] + ("..." if len(paste.url) > 50 else "")
+
+        t.add_row(paste_id_str, date_str, size_str, tags_str, url_str)
+
+    console.print(t)
     console.print()
 
 

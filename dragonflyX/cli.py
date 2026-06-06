@@ -21,17 +21,23 @@ from dragonflyX.modules.decoders import (
     decode_url,
 )
 from dragonflyX.modules.dns_tools import lookup_domain
+from dragonflyX.modules.dorks_generator import generate_dorks
 from dragonflyX.modules.hash_check import check_file, check_hash
 from dragonflyX.modules.identity import scan_email, scan_username
 from dragonflyX.modules.ip_intel import analyze_ip
+from dragonflyX.modules.paste_search import search_paste
+from dragonflyX.modules.phone_intel import lookup_phone
 from dragonflyX.modules.url_analysis import analyze_url
 from dragonflyX.output.console import (
     console,
     display_dns_result,
+    display_dorks_result,
     display_error,
     display_hash_result,
     display_identity_result,
     display_ip_result,
+    display_paste_result,
+    display_phone_result,
     display_url_result,
     show_banner,
     show_spinner,
@@ -174,14 +180,43 @@ def user(
 def dns(
     target: str = typer.Argument(..., help="Domain to look up"),
     records: str = typer.Option("A,AAAA,MX,NS,TXT", "--records", "-r", help="Record types, comma-separated"),
+    subdomains: bool = typer.Option(
+        False,
+        "--subdomains",
+        "-s",
+        help="Enumerate subdomains using a built-in wordlist",
+    ),
     output: Path | None = typer.Option(None, "--output", "-o"),
     no_cache: bool = typer.Option(False, "--no-cache"),
     debug: bool = typer.Option(False, "--debug"),
 ) -> None:
     """DNS lookup and WhoIs for a domain."""
-    record_types = [r.strip().upper() for r in records.split(",")]
-    coro = lookup_domain(target, record_types=record_types, use_cache=not no_cache)
-    _run_command(coro, debug, output, False, display_dns_result, use_html=False)
+    _run_command(
+        lookup_domain(target, use_cache=not no_cache, enumerate_subs=subdomains),
+        debug,
+        output,
+        False,
+        display_dns_result,
+        use_html=False,
+    )
+
+
+@app.command(name="phone")
+def phone_cmd(
+    target: str = typer.Argument(..., help="Phone number to analyze"),
+    output: Path | None = typer.Option(None, "--output", "-o"),
+    no_cache: bool = typer.Option(False, "--no-cache"),
+    debug: bool = typer.Option(False, "--debug"),
+) -> None:
+    """Look up carrier, region, and line type for a phone number."""
+    _run_command(
+        lookup_phone(target, use_cache=not no_cache),
+        debug,
+        output,
+        False,
+        display_phone_result,
+        use_html=False,
+    )
 
 
 @app.command()
@@ -267,6 +302,42 @@ def config_show() -> None:
         status = "[green]YES[/green]" if configured else "[red]NO[/red]"
         t.add_row(api, status, env_var)
     console.print(t)
+
+
+@app.command(name="dorks")
+def dorks_cmd(
+    target: str = typer.Argument(..., help="Domain, email, username, or organization name"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Save results to file"),
+    no_cache: bool = typer.Option(False, "--no-cache", help="Bypass cache"),
+    debug: bool = typer.Option(False, "--debug", help="Enable debug logging"),
+) -> None:
+    """Generate OSINT Google Dorks for a target."""
+    _run_command(
+        generate_dorks(target),
+        debug,
+        output,
+        False,
+        display_dorks_result,
+        use_html=False,
+    )
+
+
+@app.command(name="paste")
+def paste_cmd(
+    target: str = typer.Argument(..., help="Email, username, domain, or IP to search"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Save results to file"),
+    no_cache: bool = typer.Option(False, "--no-cache", help="Bypass cache"),
+    debug: bool = typer.Option(False, "--debug", help="Enable debug logging"),
+) -> None:
+    """Search public paste sites for leaked data related to a target."""
+    _run_command(
+        search_paste(target, use_cache=not no_cache),
+        debug,
+        output,
+        False,
+        display_paste_result,
+        use_html=False,
+    )
 
 
 if __name__ == "__main__":

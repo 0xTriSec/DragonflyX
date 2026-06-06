@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
-
 
 type RiskLevel = Literal["critical", "high", "medium", "low", "unknown"]
 
@@ -87,7 +86,7 @@ class IPIntelResult(BaseModel):
     """Combined IP intelligence result from all providers."""
 
     ip: str
-    query_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    query_time: datetime = Field(default_factory=lambda: datetime.now(UTC))
     risk_level: RiskLevel = "unknown"
     risk_score: int = 0
     virustotal: VirusTotalIPResult | None = None

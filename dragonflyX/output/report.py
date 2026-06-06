@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
@@ -26,8 +26,8 @@ def _add_metadata(data: dict) -> dict:
     """Add tool metadata to report."""
     data["_meta"] = {
         "tool": "DragonflyX",
-        "version": "1.0.0",
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "version": "2.0.0",
+        "generated_at": datetime.now(UTC).isoformat(),
     }
     return data
 
@@ -119,7 +119,7 @@ class CaseManager:
             The case ID
         """
         if case_id is None:
-            case_id = f"case_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
+            case_id = f"case_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
         self._active[case_id] = self._active.get(case_id, [])
         return case_id
 

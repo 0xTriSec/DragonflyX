@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
+from dragonflyX.config import require_key
 from dragonflyX.core.cache import cache
 from dragonflyX.core.exceptions import APIError, APIKeyMissing, NetworkError, RateLimited
 from dragonflyX.core.http_client import HTTPClient
 from dragonflyX.core.logger import logger
 from dragonflyX.core.rate_limiter import rate_limiter
-from dragonflyX.config import require_key
 from dragonflyX.modules.hash_check.schemas import EngineResult, HashCheckResult
 
 
@@ -55,7 +55,7 @@ async def fetch(target: str, hash_type: str, client: HTTPClient) -> HashCheckRes
                 )
             raise
 
-        attrs = data.get("attributes", {})
+        attrs = data.get("data", {}).get("attributes", {})
         stats = attrs.get("last_analysis_stats", {})
 
         malicious = stats.get("malicious", 0)
@@ -86,13 +86,13 @@ async def fetch(target: str, hash_type: str, client: HTTPClient) -> HashCheckRes
         first_seen = None
         if attrs.get("first_submission_date"):
             first_seen = datetime.fromtimestamp(
-                attrs["first_submission_date"], tz=timezone.utc
+                attrs["first_submission_date"], tz=UTC
             )
 
         last_seen = None
         if attrs.get("last_analysis_date"):
             last_seen = datetime.fromtimestamp(
-                attrs["last_analysis_date"], tz=timezone.utc
+                attrs["last_analysis_date"], tz=UTC
             )
 
         result = HashCheckResult(

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import re
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 from pydantic import BaseModel, Field
@@ -147,7 +147,7 @@ class IdentityResult(BaseModel):
 
     query: str
     query_type: str = "username"
-    query_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    query_time: datetime = Field(default_factory=lambda: datetime.now(UTC))
     found: list[PlatformResult] = Field(default_factory=list)
     not_found: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)

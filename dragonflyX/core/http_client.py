@@ -25,7 +25,7 @@ class HTTPClient:
     """Async HTTP client with automatic retry and error handling."""
 
     DEFAULT_HEADERS = {
-        "User-Agent": "DragonflyX/1.0.0 OSINT-SOC-Tool",
+        "User-Agent": "DragonflyX/2.0.0 OSINT-SOC-Tool",
         "Accept": "application/json",
     }
     TIMEOUT = httpx.Timeout(10.0, connect=5.0)
@@ -94,6 +94,14 @@ class HTTPClient:
                     raise APIError(api_name=api_name, status_code=503, message="Service unavailable")
 
                 if 400 <= response.status_code < 500:
+                    try:
+                        body = response.json()
+                        msg = str(body.get("error", body.get("message", response.text[:200])))
+                    except Exception:
+                        msg = response.text[:200]
+                    raise APIError(api_name=api_name, status_code=response.status_code, message=msg)
+
+                if response.status_code >= 500:
                     try:
                         body = response.json()
                         msg = str(body.get("error", body.get("message", response.text[:200])))

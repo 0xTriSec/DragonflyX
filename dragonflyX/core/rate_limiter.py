@@ -14,6 +14,7 @@ LIMITS: dict[str, dict] = {
     "urlscan":    {"semaphore": 2, "min_interval": 0.0},
     "shodan":     {"semaphore": 1, "min_interval": 0.0},
     "ipinfo":     {"semaphore": 10, "min_interval": 0.0},
+    "leakcheck":  {"semaphore": 1, "min_interval": 3.0},
 }
 
 

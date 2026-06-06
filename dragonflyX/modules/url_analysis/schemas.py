@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
-
 
 type URLRiskLevel = Literal["malicious", "suspicious", "clean", "unknown"]
 
@@ -42,7 +41,7 @@ class URLAnalysisResult(BaseModel):
     url: str
     decoded_url: str | None = None
     encoding_type: str | None = None
-    query_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    query_time: datetime = Field(default_factory=lambda: datetime.now(UTC))
     risk_level: URLRiskLevel = "unknown"
     risk_score: int = 0
     urlscan: URLScanResult | None = None

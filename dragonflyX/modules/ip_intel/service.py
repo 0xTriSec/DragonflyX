@@ -8,10 +8,7 @@ from dragonflyX.core.cache import cache
 from dragonflyX.core.exceptions import APIError, APIKeyMissing, NetworkError, RateLimited
 from dragonflyX.core.http_client import get_client
 from dragonflyX.core.validators import validate_ip
-from dragonflyX.modules.ip_intel.providers import virustotal
-from dragonflyX.modules.ip_intel.providers import abuseipdb
-from dragonflyX.modules.ip_intel.providers import shodan
-from dragonflyX.modules.ip_intel.providers import ipinfo
+from dragonflyX.modules.ip_intel.providers import abuseipdb, ipinfo, shodan, virustotal
 from dragonflyX.modules.ip_intel.schemas import IPIntelResult, RiskLevel
 
 
@@ -38,6 +35,13 @@ async def analyze_ip(ip: str, use_cache: bool = True) -> IPIntelResult:
 
     client = get_client()
     errors: dict[str, str] = {}
+    key_map = {
+        "www.virustotal.com": "virustotal",
+        "virustotal.com": "virustotal",
+        "api.abuseipdb.com": "abuseipdb",
+        "api.shodan.io": "shodan",
+        "ipinfo.io": "ipinfo",
+    }
 
     vt_result = ab_result = sh_result = ip_result = None
     vt_task = ab_task = sh_task = ip_task = None
@@ -50,7 +54,8 @@ async def analyze_ip(ip: str, use_cache: bool = True) -> IPIntelResult:
             ip_task = tg.create_task(ipinfo.fetch(ip, client))
     except* (APIError, NetworkError, RateLimited, APIKeyMissing, asyncio.CancelledError) as eg:
         for exc in eg.exceptions:
-            api_name = getattr(exc, "api_name", type(exc).__name__.lower())
+            api_name = getattr(exc, "api_name", "unknown")
+            api_name = key_map.get(api_name, api_name)
             errors[api_name] = str(exc)
 
     def safe_result(task):

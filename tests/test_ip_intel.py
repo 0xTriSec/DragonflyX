@@ -18,7 +18,7 @@ class TestAnalyzeIP:
     async def test_analyze_ip_all_providers_success(self, vt_ip_response, abuseipdb_response, shodan_response, ipinfo_response) -> None:
         """Test analyze_ip with all providers returning valid data."""
         # Mock VirusTotal
-        vt_route = respx.get(f"https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8")
+        vt_route = respx.get("https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8")
         vt_route.return_value = httpx.Response(200, json=vt_ip_response)
 
         # Mock AbuseIPDB
@@ -26,7 +26,7 @@ class TestAnalyzeIP:
         ab_route.return_value = httpx.Response(200, json=abuseipdb_response)
 
         # Mock Shodan
-        sh_route = respx.get(f"https://api.shodan.io/shodan/host/8.8.8.8")
+        sh_route = respx.get("https://api.shodan.io/shodan/host/8.8.8.8")
         sh_route.return_value = httpx.Response(200, json=shodan_response)
 
         # Mock ipinfo
@@ -63,13 +63,13 @@ class TestAnalyzeIP:
             }
         }
 
-        respx.get(f"https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8").mock(
+        respx.get("https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8").mock(
             return_value=httpx.Response(200, json=vt_response)
         )
         respx.get("https://api.abuseipdb.com/api/v2/check").mock(
             return_value=httpx.Response(200, json=abuseipdb_response)
         )
-        respx.get(f"https://api.shodan.io/shodan/host/8.8.8.8").mock(
+        respx.get("https://api.shodan.io/shodan/host/8.8.8.8").mock(
             return_value=httpx.Response(200, json=shodan_response)
         )
         respx.get("https://ipinfo.io/8.8.8.8/json").mock(
@@ -86,7 +86,7 @@ class TestAnalyzeIP:
     @pytest.mark.asyncio
     async def test_analyze_ip_abuse_high_score_tor(self, vt_ip_clean_response, shodan_response, ipinfo_response) -> None:
         """Test that AbuseIPDB score=92 + TOR results in high score."""
-        respx.get(f"https://www.virustotal.com/api/v3/ip_addresses/1.2.3.4").mock(
+        respx.get("https://www.virustotal.com/api/v3/ip_addresses/1.2.3.4").mock(
             return_value=httpx.Response(200, json=vt_ip_clean_response)
         )
         respx.get("https://api.abuseipdb.com/api/v2/check").mock(
@@ -104,7 +104,7 @@ class TestAnalyzeIP:
                 }
             })
         )
-        respx.get(f"https://api.shodan.io/shodan/host/1.2.3.4").mock(
+        respx.get("https://api.shodan.io/shodan/host/1.2.3.4").mock(
             return_value=httpx.Response(200, json=shodan_response)
         )
         respx.get("https://ipinfo.io/1.2.3.4/json").mock(
@@ -120,14 +120,14 @@ class TestAnalyzeIP:
     @pytest.mark.asyncio
     async def test_analyze_ip_shodan_404_returns_empty_result(self, vt_ip_response, abuseipdb_response, ipinfo_response) -> None:
         """Test that Shodan 404 returns empty ShodanResult, not an error."""
-        respx.get(f"https://www.virustotal.com/api/v3/ip_addresses/1.1.1.1").mock(
+        respx.get("https://www.virustotal.com/api/v3/ip_addresses/1.1.1.1").mock(
             return_value=httpx.Response(200, json=vt_ip_response)
         )
         respx.get("https://api.abuseipdb.com/api/v2/check").mock(
             return_value=httpx.Response(200, json=abuseipdb_response)
         )
         # Shodan returns 404 for non-indexed IPs
-        respx.get(f"https://api.shodan.io/shodan/host/1.1.1.1").mock(
+        respx.get("https://api.shodan.io/shodan/host/1.1.1.1").mock(
             return_value=httpx.Response(404, json={"error": "No information available"})
         )
         respx.get("https://ipinfo.io/1.1.1.1/json").mock(
@@ -150,13 +150,20 @@ class TestAnalyzeIP:
         self, abuseipdb_response, shodan_response, ipinfo_response
     ) -> None:
         """Test that VT server error is captured in errors, other providers still succeed."""
-        respx.get(f"https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8").mock(
+        from dragonflyX.core.cache import cache
+
+        cache.delete(cache.make_key("virustotal", "8.8.8.8"))
+        cache.delete(cache.make_key("abuseipdb", "8.8.8.8"))
+        cache.delete(cache.make_key("shodan", "8.8.8.8"))
+        cache.delete(cache.make_key("ipinfo", "8.8.8.8"))
+        cache.delete(cache.make_key("ip_intel", "8.8.8.8"))
+        respx.get("https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8").mock(
             return_value=httpx.Response(500, json={"error": "Internal Server Error"})
         )
         respx.get("https://api.abuseipdb.com/api/v2/check").mock(
             return_value=httpx.Response(200, json=abuseipdb_response)
         )
-        respx.get(f"https://api.shodan.io/shodan/host/8.8.8.8").mock(
+        respx.get("https://api.shodan.io/shodan/host/8.8.8.8").mock(
             return_value=httpx.Response(200, json=shodan_response)
         )
         respx.get("https://ipinfo.io/8.8.8.8/json").mock(
@@ -176,13 +183,13 @@ class TestAnalyzeIP:
     @pytest.mark.asyncio
     async def test_analyze_ip_uses_cache(self, vt_ip_response, abuseipdb_response, shodan_response, ipinfo_response) -> None:
         """Test that second call returns cached result."""
-        respx.get(f"https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8").mock(
+        respx.get("https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8").mock(
             return_value=httpx.Response(200, json=vt_ip_response)
         )
         respx.get("https://api.abuseipdb.com/api/v2/check").mock(
             return_value=httpx.Response(200, json=abuseipdb_response)
         )
-        respx.get(f"https://api.shodan.io/shodan/host/8.8.8.8").mock(
+        respx.get("https://api.shodan.io/shodan/host/8.8.8.8").mock(
             return_value=httpx.Response(200, json=shodan_response)
         )
         respx.get("https://ipinfo.io/8.8.8.8/json").mock(

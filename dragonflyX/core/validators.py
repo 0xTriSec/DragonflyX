@@ -158,6 +158,13 @@ def validate_domain(value: str) -> str:
             reason="domain cannot be empty",
         )
 
+    if normalized.startswith("."):
+        raise InvalidInput(
+            input_type="domain",
+            value=value,
+            reason="domain cannot start with a dot",
+        )
+
     # Check for valid characters
     if not re.match(r"^[a-z0-9.\-]+$", normalized):
         raise InvalidInput(
@@ -226,7 +233,10 @@ def validate_username(value: str) -> str:
         raise InvalidInput(
             input_type="username",
             value=value,
-            reason="contains invalid characters (only alphanumeric, underscore, dot, hyphen allowed)",
+            reason=(
+                "contains invalid characters "
+                "(only alphanumeric, underscore, dot, hyphen allowed)"
+            ),
         )
 
     return stripped

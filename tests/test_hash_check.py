@@ -8,6 +8,7 @@ import httpx
 import pytest
 import respx
 
+from dragonflyX.core.cache import cache
 from dragonflyX.core.exceptions import InvalidInput
 from dragonflyX.modules.hash_check import check_file, check_hash
 
@@ -19,15 +20,16 @@ class TestCheckHash:
     @pytest.mark.asyncio
     async def test_check_hash_not_found(self) -> None:
         """Test check_hash with VT returning 404 - unknown risk."""
-        respx.get(f"https://www.virustotal.com/api/v3/files/unknownhash123456789012345678901234567").mock(
+        hash_val = "0000000000000000000000000000000000000001"
+        respx.get(f"https://www.virustotal.com/api/v3/files/{hash_val}").mock(
             return_value=httpx.Response(404, json={"error": {"code": "NotFoundError"}})
         )
 
-        result = await check_hash("unknownhash12345678901234567890123456", use_cache=False)
+        result = await check_hash(hash_val, use_cache=False)
 
         assert result.risk_level == "unknown"
         assert result.risk_score == 0
-        assert result.hash_value == "unknownhash12345678901234567890123456"
+        assert result.hash_value == hash_val
 
     @respx.mock
     @pytest.mark.asyncio
@@ -49,6 +51,8 @@ class TestCheckHash:
     async def test_check_hash_medium(self) -> None:
         """Test check_hash with 3 malicious - medium risk."""
         hash_val = "d41d8cd98f00b204e9800998ecf8427e"  # MD5
+        cache_key = cache.make_key("hash_check", hash_val)
+        cache.delete(cache_key)
         vt_response = {
             "data": {
                 "attributes": {
@@ -82,6 +86,8 @@ class TestCheckHash:
     async def test_check_hash_low(self) -> None:
         """Test check_hash with 0 malicious, 0 suspicious - low risk."""
         hash_val = "d41d8cd98f00b204e9800998ecf8427e"  # MD5
+        cache_key = cache.make_key("hash_check", hash_val)
+        cache.delete(cache_key)
         vt_response = {
             "data": {
                 "attributes": {
@@ -109,15 +115,13 @@ class TestCheckHash:
 
         # 0 malicious, 0 suspicious = low risk
         assert result.risk_level == "low"
-        assert result.risk_score == 5
+        assert result.risk_score == 10
 
     @respx.mock
     @pytest.mark.asyncio
     async def test_check_file_computes_sha256(self) -> None:
         """Test check_file computes SHA256 of temp file and calls VT."""
         content = b"Test content for hashing"
-        # Expected SHA256 of "Test content for hashing"
-        expected_sha256 = "cc7f5d8c90b8d91e6e12b1e8c0f0a7c7b9d8e1f2a3b4c5d6e7f8a9b0c1d2e3f"
 
         vt_response = {
             "data": {
@@ -171,6 +175,8 @@ class TestCheckHash:
     async def test_check_hash_caching(self) -> None:
         """Test that second call returns cached result."""
         hash_val = "d41d8cd98f00b204e9800998ecf8427e"
+        cache_key = cache.make_key("hash_check", hash_val)
+        cache.delete(cache_key)
         vt_response = {
             "data": {
                 "attributes": {

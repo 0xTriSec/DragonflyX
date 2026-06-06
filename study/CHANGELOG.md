@@ -5,6 +5,75 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.0.0] - 2026-06-06
+
+### Added
+
+#### Phase 2B — Reconnaissance Expansion
+
+- **Phone Intel** (`dragonflyx phone`): Offline phone number analysis
+  using the `phonenumbers` library. Returns E.164 format, national format,
+  country, carrier, and line type. No API key or network call required.
+  Results cached for 24 hours.
+
+- **Subdomain Enumeration** (`dragonflyx dns --subdomains`): Optional
+  subdomain brute-force via a built-in wordlist of 100 common prefixes.
+  Includes wildcard DNS detection — results matching the wildcard IP are
+  marked `is_wildcard=True`. Results cached separately for 30 minutes.
+
+#### Phase 2C — OSINT Intelligence Sources
+
+- **Google Dorks Generator** (`dragonflyx dorks`): Generate 14 targeted
+  Google dork URLs across four categories — IDENTITY, CREDENTIALS & LEAKS,
+  INFRASTRUCTURE, and TECHNICAL EXPOSURE — for domain, email, username,
+  and organization targets. Zero external dependencies, no API key required.
+  Results cached for 7 days.
+
+- **Paste Search** (`dragonflyx paste`): Query LeakCheck public API for
+  breach data associated with a target email, domain, username, or IP
+  address. Returns breach source name, date, and size. No API key required.
+  Results cached for 1 hour.
+
+#### Core Infrastructure Improvements
+
+- **5xx Error Normalization**: `core/http_client.py` now converts HTTP 5xx
+  responses to `APIError`, ensuring consistent error handling across all
+  providers.
+- **Risk Scoring Fixes**: `hash_check` and `url_analysis` risk scoring
+  logic corrected — scores now reflect actual VirusTotal detection counts.
+- **Validator**: `validate_domain()` now rejects domains starting with a
+  dot, matching RFC standards.
+- **Cache Exception Chaining**: All `CacheError` raises in `core/cache.py`
+  now chain the original exception with `from e`.
+
+#### New Cache TTLs
+
+| Source | TTL |
+|---|---|
+| `phone_intel` | 24 hours |
+| `dns_subs` | 30 minutes |
+| `dorks` | 7 days |
+| `leakcheck` | 1 hour |
+
+#### New Dependencies
+
+- `phonenumbers>=8.13.0` — offline phone number parsing and carrier lookup
+
+### Fixed
+
+- `hash_check` risk level returning `unknown` for files with 0 detections
+  when `total_engines > 0`; now correctly returns `low`
+- `url_analysis` VT malicious score not added to `risk_score` due to
+  incorrect JSON path in VT URL provider poll response
+- `ip_intel` VT HTTP 500 errors not captured in `result.errors` due to
+  raw `httpx.HTTPStatusError` escaping the `except*` block
+- `validate_domain()` not rejecting `.startswithdot.com` style domains
+- `detect_hash_type()` test data using incorrect 32-char SHA256 hash
+- Cache pollution between tests causing intermittent failures in
+  `test_hash_check` and `test_ip_intel`
+
+---
+
 ## [1.0.0] - 2026-6-1
 
 Initial public release.

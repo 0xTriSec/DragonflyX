@@ -6,6 +6,7 @@ import httpx
 import pytest
 import respx
 
+from dragonflyX.core.cache import cache
 from dragonflyX.modules.url_analysis import analyze_url
 
 
@@ -152,6 +153,9 @@ class TestAnalyzeURL:
     @pytest.mark.asyncio
     async def test_analyze_url_vt_malicious_increases_score(self) -> None:
         """Test that VT with multiple malicious engines increases score."""
+        cache.delete(cache.make_key("url_analysis", "https://example.com"))
+        cache.delete(cache.make_key("urlscan", "https://example.com"))
+        cache.delete(cache.make_key("urlscan_vt", "https://example.com"))
         # URLScan submit
         respx.post("https://urlscan.io/api/v1/scan/").mock(
             return_value=httpx.Response(200, json={"uuid": "vt-score-uuid"})

@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 
+from dragonflyX.config import require_key
 from dragonflyX.core.cache import cache
 from dragonflyX.core.exceptions import APIError, APIKeyMissing, NetworkError, RateLimited
 from dragonflyX.core.http_client import HTTPClient
 from dragonflyX.core.logger import logger
 from dragonflyX.core.rate_limiter import rate_limiter
-from dragonflyX.config import require_key
 from dragonflyX.modules.url_analysis.schemas import VTURLResult
 
 
@@ -85,7 +85,7 @@ async def fetch(target: str, client: HTTPClient) -> VTURLResult | None:
                             status_code=poll_response.status_code,
                             message=poll_response.text,
                         )
-                    data = poll_response.json().get("data", {})
+                    data = poll_response.json()
             except (RateLimited, NetworkError, APIError):
                 raise
 
@@ -96,7 +96,7 @@ async def fetch(target: str, client: HTTPClient) -> VTURLResult | None:
                 last_date = attrs.get("date")
                 last_analysis_date = None
                 if last_date:
-                    last_analysis_date = datetime.fromtimestamp(last_date, tz=timezone.utc)
+                    last_analysis_date = datetime.fromtimestamp(last_date, tz=UTC)
 
                 result = VTURLResult(
                     malicious=stats.get("malicious", 0),

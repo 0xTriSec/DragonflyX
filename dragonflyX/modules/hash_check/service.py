@@ -34,21 +34,18 @@ async def check_hash(hash_input: str, use_cache: bool = True) -> HashCheckResult
     result = await virustotal.fetch(normalized, hash_type, client)
 
     # Risk scoring
-    m = result.malicious_count
-    s = result.suspicious_count
+    malicious = result.malicious_count
 
-    if result.risk_level == "unknown":
-        pass  # 404 from VT — leave as unknown
-    elif m > 10:
+    if malicious >= 10:
         result.risk_level, result.risk_score = "critical", 90
-    elif m >= 5:
+    elif malicious >= 5:
         result.risk_level, result.risk_score = "high", 70
-    elif m >= 1:
-        result.risk_level, result.risk_score = "medium", 40 + min(s * 10, 10)
-    elif s > 0:
-        result.risk_level, result.risk_score = "medium", 10
+    elif malicious >= 1:
+        result.risk_level, result.risk_score = "medium", 40
+    elif result.malicious_count == 0 and result.suspicious_count == 0 and result.total_engines > 0:
+        result.risk_level, result.risk_score = "low", 10
     else:
-        result.risk_level, result.risk_score = "low", 5
+        result.risk_level, result.risk_score = "unknown", 0
 
     if use_cache:
         cache.set(

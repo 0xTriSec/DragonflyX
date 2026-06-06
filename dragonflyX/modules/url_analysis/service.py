@@ -39,6 +39,13 @@ async def analyze_url(url: str, use_cache: bool = True) -> URLAnalysisResult:
 
     client = get_client()
     errors: dict[str, str] = {}
+    key_map = {
+        "www.virustotal.com": "virustotal",
+        "virustotal.com": "virustotal",
+        "api.abuseipdb.com": "abuseipdb",
+        "api.shodan.io": "shodan",
+        "ipinfo.io": "ipinfo",
+    }
     us_result = vt_result = None
 
     try:
@@ -47,7 +54,8 @@ async def analyze_url(url: str, use_cache: bool = True) -> URLAnalysisResult:
             vt_task = tg.create_task(vt_provider.fetch(url_to_scan, client))
     except* (APIError, NetworkError, RateLimited, APIKeyMissing, asyncio.CancelledError) as eg:
         for exc in eg.exceptions:
-            api_name = getattr(exc, "api_name", type(exc).__name__.lower())
+            api_name = getattr(exc, "api_name", "unknown")
+            api_name = key_map.get(api_name, api_name)
             errors[api_name] = str(exc)
 
     def safe_result(task):
@@ -70,7 +78,7 @@ async def analyze_url(url: str, use_cache: bool = True) -> URLAnalysisResult:
             score += int(us_result.verdict_score * 0.4)
 
     if vt_result:
-        if vt_result.malicious > 3:
+        if vt_result.malicious >= 5:
             score += 40
         elif vt_result.malicious >= 1:
             score += 20

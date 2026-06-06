@@ -11,3 +11,4 @@ python-whois>=0.9
 pyfiglet>=1.0
 jinja2>=3.1
 python-dotenv>=1.0
+phonenumbers>=8.13.0
