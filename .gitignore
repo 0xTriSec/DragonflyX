@@ -16,3 +16,8 @@ report.json
 logs/
 .venv/
 venv/
+# Temporary output files
+*.output.txt
+ruff_full_output.txt
+pytest_output.txt
+cli_help.txt
