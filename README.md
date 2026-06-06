@@ -133,10 +133,10 @@ Looks up carrier, region, and line type for a phone number using the
 `phonenumbers` library. Fully offline — no API key or network call required.
 
 ```bash
-dragonflyx phone +84901234567
-dragonflyx phone +14155552671
-dragonflyx phone +84901234567 --no-cache
-dragonflyx phone +84901234567 -o result.json
+dragonflyx phone +8490xxxxxxx
+dragonflyx phone +1415xxxxxx
+dragonflyx phone +8490xxxxxxx --no-cache
+dragonflyx phone +8490xxxxxxx -o result.json
 ```
 
 Note: Phone numbers must include the country code prefix (e.g. +84, +1).
