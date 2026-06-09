@@ -27,6 +27,7 @@ TTL_MAP: dict[str, int] = {
     "identity":      1 * 3600,
     "dorks":         7 * 24 * 3600,
     "leakcheck":    1 * 3600,
+    "investigation": 30 * 60,
 }
 DEFAULT_TTL = 3600
 

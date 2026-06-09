@@ -26,7 +26,7 @@ def _add_metadata(data: dict) -> dict:
     """Add tool metadata to report."""
     data["_meta"] = {
         "tool": "DragonflyX",
-        "version": "2.0.0",
+        "version": "3.0.0",
         "generated_at": datetime.now(UTC).isoformat(),
     }
     return data

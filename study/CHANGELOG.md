@@ -3,6 +3,50 @@
 All notable changes to DragonflyX are documented in this file.  
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.0.0] - 2026-06-09
+
+### Added
+
+#### Phase 3B — Investigation Platform
+
+- **Investigate command** (`dragonflyx investigate`): Full OSINT
+  investigation from a single target. Accepts IP address, domain name,
+  or email address. Automatically detects input type and chains:
+  IP intelligence, DNS + WHOIS, subdomain enumeration, breach search,
+  and dork generation. Each step is independent — failures are captured
+  without stopping the investigation.
+
+- **Input type detection**: Automatic classification of IP, domain,
+  and email targets via `detect_target()`.
+
+- **Investigation pivoting**: Automatic extraction of related indicators
+  — hostname from IP, domain from hostname, WHOIS email from DNS result,
+  IP from A records.
+
+#### New CLI Command
+
+| Command | Description |
+|---|---|
+| `dragonflyx investigate <TARGET>` | Full OSINT investigation |
+| `dragonflyx investigate <TARGET> --no-subs` | Skip subdomain enumeration |
+
+#### New Cache TTL
+- `investigation`: 30 minutes
+
+#### New module: investigation/
+  `schemas.py`   — InvestigationTarget, InvestigationStep, InvestigationResult
+  `service.py`   — investigate(), _investigate_ip(), _investigate_domain(),
+                 _investigate_email()
+  `pivots.py`    — helper functions for data extraction and pivoting
+  `detect.py`    — detect_target() input type classification
+
+### Fixed (v3.0.0)
+- Investigation pivot: hostname extraction from IPIntelResult now
+  correctly reads ipinfo.hostname field
+- DNS pivot block now runs independently after IP intel step,
+  not nested inside IP intel try/except
+- timezone.UTC → timezone.utc compatibility fix for Python 3.14
+
 ---
 
 ## [2.0.0] - 2026-06-06

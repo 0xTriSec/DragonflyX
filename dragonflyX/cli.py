@@ -24,6 +24,8 @@ from dragonflyX.modules.dns_tools import lookup_domain
 from dragonflyX.modules.dorks_generator import generate_dorks
 from dragonflyX.modules.hash_check import check_file, check_hash
 from dragonflyX.modules.identity import scan_email, scan_username
+from dragonflyX.modules.investigation import investigate
+from dragonflyX.modules.investigation.schemas import InvestigationResult
 from dragonflyX.modules.ip_intel import analyze_ip
 from dragonflyX.modules.paste_search import search_paste
 from dragonflyX.modules.phone_intel import lookup_phone
@@ -35,6 +37,7 @@ from dragonflyX.output.console import (
     display_error,
     display_hash_result,
     display_identity_result,
+    display_investigation_result,
     display_ip_result,
     display_paste_result,
     display_phone_result,
@@ -215,6 +218,41 @@ def phone_cmd(
         output,
         False,
         display_phone_result,
+        use_html=False,
+    )
+
+
+@app.command(name="investigate")
+def investigate_cmd(
+    target: str = typer.Argument(
+        ...,
+        help="IP address, domain name, or email address to investigate",
+    ),
+    no_subs: bool = typer.Option(
+        False,
+        "--no-subs",
+        help="Skip subdomain enumeration (faster)",
+    ),
+    output: Path | None = typer.Option(
+        None, "--output", "-o",
+        help="Save report to file",
+    ),
+    no_cache: bool = typer.Option(False, "--no-cache"),
+    debug: bool = typer.Option(False, "--debug"),
+) -> None:
+    """
+    Run a full OSINT investigation on an IP, domain, or email.
+
+    Automatically detects the input type and chains all relevant
+    intelligence sources: IP scan, DNS, subdomain enumeration,
+    breach search, and dork generation.
+    """
+    _run_command(
+        investigate(target, use_cache=not no_cache, enumerate_subs=not no_subs),
+        debug,
+        output,
+        False,
+        display_investigation_result,
         use_html=False,
     )
 

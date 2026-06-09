@@ -1,0 +1,71 @@
+{
+  "ip": "8.8.8.8",
+  "query_time": "2026-06-09T04:11:23.577745Z",
+  "risk_level": "low",
+  "risk_score": 20,
+  "virustotal": {
+    "malicious": 3,
+    "suspicious": 1,
+    "harmless": 60,
+    "undetected": 9,
+    "total_engines": 73,
+    "last_analysis_date": "2023-11-14T22:13:20Z",
+    "reputation": -10
+  },
+  "abuseipdb": {
+    "abuse_score": 0,
+    "total_reports": 0,
+    "last_reported": null,
+    "isp": "Google LLC",
+    "usage_type": "Data Center",
+    "is_tor": false,
+    "country_code": "US"
+  },
+  "shodan": {
+    "open_ports": [
+      80,
+      443,
+      8080
+    ],
+    "services": [
+      {
+        "port": 80,
+        "protocol": "tcp",
+        "service": "nginx",
+        "banner": "HTTP/1.1 200 OK"
+      },
+      {
+        "port": 443,
+        "protocol": "tcp",
+        "service": "nginx",
+        "banner": ""
+      }
+    ],
+    "vulns": [],
+    "hostnames": [
+      "dns.google"
+    ],
+    "tags": [],
+    "last_update": "2024-01-01T00:00:00",
+    "os": null
+  },
+  "ipinfo": {
+    "geo": {
+      "country": "US",
+      "city": "Mountain View",
+      "org": "AS15169 Google LLC",
+      "asn": "AS15169",
+      "latitude": 37.4056,
+      "longitude": -122.0775
+    },
+    "hostname": "dns.google",
+    "is_bogon": false
+  },
+  "errors": {},
+  "cached": true,
+  "_meta": {
+    "tool": "DragonflyX",
+    "version": "3.0.0",
+    "generated_at": "2026-06-09T04:51:43.288074+00:00"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "query": "johndoe99",
+  "query_type": "username",
+  "query_time": "2026-06-09T04:53:03.181750Z",
+  "found": [
+    {
+      "platform": "GitHub",
+      "url": "https://github.com/johndoe99",
+      "response_time_ms": 2946
+    },
+    {
+      "platform": "Twitter/X",
+      "url": "https://twitter.com/johndoe99",
+      "response_time_ms": 4372
+    },
+    {
+      "platform": "Instagram",
+      "url": "https://www.instagram.com/johndoe99/",
+      "response_time_ms": 2929
+    },
+    {
+      "platform": "Reddit",
+      "url": "https://www.reddit.com/user/johndoe99",
+      "response_time_ms": 1643
+    },
+    {
+      "platform": "TikTok",
+      "url": "https://www.tiktok.com/@johndoe99",
+      "response_time_ms": 1826
+    },
+    {
+      "platform": "YouTube",
+      "url": "https://www.youtube.com/@johndoe99",
+      "response_time_ms": 1103
+    },
+    {
+      "platform": "Twitch",
+      "url": "https://www.twitch.tv/johndoe99",
+      "response_time_ms": 518
+    },
+    {
+      "platform": "Pinterest",
+      "url": "https://www.pinterest.com/johndoe99/",
+      "response_time_ms": 1841
+    },
+    {
+      "platform": "GitLab",
+      "url": "https://gitlab.com/johndoe99",
+      "response_time_ms": 1967
+    },
+    {
+      "platform": "Behance",
+      "url": "https://www.behance.net/johndoe99",
+      "response_time_ms": 2122
+    },
+    {
+      "platform": "Mastodon",
+      "url": "https://mastodon.social/@johndoe99",
+      "response_time_ms": 751
+    },
+    {
+      "platform": "Snapchat",
+      "url": "https://www.snapchat.com/add/johndoe99",
+      "response_time_ms": 1107
+    }
+  ],
+  "not_found": [
+    "Facebook",
+    "LinkedIn",
+    "Medium",
+    "DevTo",
+    "Dribbble",
+    "HackerNews",
+    "Keybase",
+    "Pastebin"
+  ],
+  "errors": [],
+  "error_count": 0,
+  "response_times": {
+    "GitHub": 2946.0,
+    "Twitter/X": 4372.0,
+    "Instagram": 2929.0,
+    "Reddit": 1643.0,
+    "TikTok": 1826.0,
+    "YouTube": 1103.0,
+    "Twitch": 518.0,
+    "Pinterest": 1841.0,
+    "GitLab": 1967.0,
+    "Behance": 2122.0,
+    "Mastodon": 751.0,
+    "Snapchat": 1107.0
+  },
+  "cached": true,
+  "_meta": {
+    "tool": "DragonflyX",
+    "version": "3.0.0",
+    "generated_at": "2026-06-09T04:53:04.451219+00:00"
+  }
+}

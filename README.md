@@ -25,6 +25,9 @@ DragonflyX enriches indicators of compromise (IP addresses, URLs, file hashes, u
   domains, emails, usernames, and organizations
 - **Paste Search** — Search public paste sites for leaked credentials
   and sensitive data associated with a target
+- **Investigate** — Full OSINT investigation from a single target.
+  Auto-detects IP, domain, or email and chains all intelligence
+  sources in sequence
 - **Decoders** — Decode Base64, SafeLinks, and ProofPoint encoded URLs
 - **Risk Scoring** — Color-coded assessment:
   `critical` · `high` · `medium` · `low` · `unknown`
@@ -173,6 +176,36 @@ dragonflyx paste example.com -o paste_results.json
 
 Note: No API key required. LeakCheck is a public third-party service.
 
+### Investigate
+
+Run a full OSINT investigation from a single target. DragonflyX
+automatically detects whether the input is an IP address, domain name,
+or email address, then chains all relevant intelligence sources.
+
+```bash
+# Investigate an IP address
+dragonflyx investigate 185.220.101.45
+
+# Investigate a domain
+dragonflyx investigate evil-domain.com
+
+# Investigate an email address
+dragonflyx investigate admin@evil-domain.com
+
+# Skip subdomain enumeration for faster results
+dragonflyx investigate 185.220.101.45 --no-subs
+
+# Save full report
+dragonflyx investigate evil-domain.com -o report.json
+```
+
+Each investigation automatically runs:
+- IP intelligence (VirusTotal, AbuseIPDB, Shodan, ipinfo)
+- DNS lookup and WHOIS
+- Subdomain enumeration
+- Breach data search (LeakCheck)
+- Google dorks generation
+
 ### Decode Strings
 
 Decode various encoded strings or URLs.
@@ -270,10 +303,11 @@ DragonflyX/
 │   │   ├── hash_check/
 │   │   ├── identity.py
 │   │   ├── dns_tools.py
-│   │   ├── decoders.py
 │   │   ├── phone_intel.py
 │   │   ├── dorks_generator.py
-│   │   └── paste_search.py
+│   │   ├── paste_search.py
+│   │   ├── decoders.py
+│   │   └── investigation/
 │   ├── core/
 │   │   ├── http_client.py
 │   │   ├── rate_limiter.py

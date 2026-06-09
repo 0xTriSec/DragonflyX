@@ -1,0 +1,19 @@
+{
+  "url": "https://nam01.safelinks.protection.outlook.com/...",
+  "decoded_url": null,
+  "encoding_type": null,
+  "query_time": "2026-06-09T04:52:15.575307Z",
+  "risk_level": "unknown",
+  "risk_score": 0,
+  "urlscan": null,
+  "virustotal": null,
+  "errors": {
+    "virustotal": "virustotal returned HTTP 401: {'error': {'code': 'WrongCredentialsError', 'message': 'Wrong API key'}}"
+  },
+  "cached": false,
+  "_meta": {
+    "tool": "DragonflyX",
+    "version": "3.0.0",
+    "generated_at": "2026-06-09T04:52:15.582918+00:00"
+  }
+}

@@ -25,7 +25,7 @@ class HTTPClient:
     """Async HTTP client with automatic retry and error handling."""
 
     DEFAULT_HEADERS = {
-        "User-Agent": "DragonflyX/2.0.0 OSINT-SOC-Tool",
+        "User-Agent": "DragonflyX/3.0.0 OSINT-SOC-Tool",
         "Accept": "application/json",
     }
     TIMEOUT = httpx.Timeout(10.0, connect=5.0)

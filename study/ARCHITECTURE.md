@@ -260,6 +260,27 @@ Rate limit : leakcheck, semaphore=1, min_interval=3.0s
 API key : not required
 ```
 
+### investigation/
+
+```
+Purpose : orchestrate full OSINT investigation from single target
+Input   : IP address, domain name, or email address
+Files   :
+  __init__.py   — public exports: investigate, InvestigationResult,
+                  detect_target
+  schemas.py    — InvestigationTarget, InvestigationStep,
+                  InvestigationResult
+  service.py    — investigate(), _investigate_ip(),
+                  _investigate_domain(), _investigate_email()
+  pivots.py     — extract_hostname_from_ip_result(),
+                  extract_domain_from_hostname(),
+                  extract_whois_emails(),
+                  extract_ip_from_dns_result()
+  detect.py     — detect_target() input type classification
+Cache   : investigation, TTL 30 minutes
+API key : uses existing provider keys only
+```
+
 ---
 
 ## License

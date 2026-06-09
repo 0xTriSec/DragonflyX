@@ -52,7 +52,7 @@ def show_banner() -> None:
     """Display the DragonflyX ASCII banner."""
     ascii_art = pyfiglet.figlet_format("DragonflyX", font="slant")
     console.print(ascii_art, style="bold cyan")
-    console.print("  OSINT  SOC  Intelligence  |  v2.0.0\n", style="dim cyan")
+    console.print("  OSINT  SOC  Intelligence  |  v3.0.0\n", style="dim cyan")
 
 
 def show_spinner(message: str) -> Status:
@@ -587,3 +587,136 @@ def display_error(error: DragonflyXError) -> None:
             border_style="red",
         )
     )
+
+
+_RISK_BORDER: dict[str, str] = {
+    "critical": "red",
+    "high": "color(208)",
+    "medium": "yellow",
+    "low": "green",
+    "unknown": "cyan",
+}
+
+
+def display_investigation_result(result: InvestigationResult) -> None:
+    """Display a complete investigation result."""
+    risk_style = RISK_STYLES.get(result.overall_risk, "dim white")
+    border_style = _RISK_BORDER.get(result.overall_risk, "cyan")
+
+    # 1. Header Panel
+    console.print(Panel(
+        f"Investigation: {result.target}\n[dim]Type: {result.target_type}[/dim]",
+        title="Investigation",
+        border_style=border_style,
+    ))
+
+    # 2. Steps table
+    steps_table = Table(
+        title="Steps",
+        box=rich_box.ROUNDED,
+        show_header=True,
+        padding=(0, 1),
+    )
+    steps_table.add_column("Step", style="bold", min_width=30)
+    steps_table.add_column("Status", min_width=10)
+    steps_table.add_column("Duration", min_width=10, justify="right")
+    steps_table.add_column("Summary", min_width=20)
+
+    for step in result.steps:
+        status_style = {
+            "completed": "green",
+            "skipped": "dim",
+            "failed": "red",
+        }.get(step.status, "")
+        duration_str = f"{step.duration_ms}ms" if step.duration_ms else "N/A"
+        status_text = f"[{status_style}]{step.status}[/{status_style}]" if status_style else step.status
+        steps_table.add_row(step.name, status_text, duration_str, step.summary or "")
+
+    console.print(steps_table)
+
+    # 3. IP Intelligence
+    if result.ip_risk_level != "unknown":
+        ip_table = Table(box=rich_box.ROUNDED, show_header=False, padding=(0, 1))
+        ip_table.add_column("Field", style="bold", min_width=16)
+        ip_table.add_column("Value", min_width=30)
+        ip_table.add_row(
+            "IP Addresses",
+            ", ".join(result.ip_addresses) if result.ip_addresses else "N/A",
+        )
+        ip_table.add_row(
+            "Risk",
+            f"{result.ip_risk_level.upper()} ({result.ip_risk_score}/100)",
+        )
+        ip_table.add_row("ISP", result.ip_isp or "N/A")
+        ip_table.add_row("Country", result.ip_country or "N/A")
+        ip_table.add_row(
+            "Open Ports",
+            ", ".join(str(p) for p in result.open_ports) if result.open_ports else "None",
+        )
+        console.print(Panel(ip_table, title="IP Intelligence", border_style="blue"))
+
+    # 4. Domain Intelligence
+    if result.domains:
+        domain_table = Table(box=rich_box.ROUNDED, show_header=False, padding=(0, 1))
+        domain_table.add_column("Field", style="bold", min_width=16)
+        domain_table.add_column("Value", min_width=30)
+        domain_table.add_row("Domains", ", ".join(result.domains))
+        domain_table.add_row("Registrar", result.registrar or "N/A")
+        domain_table.add_row("Created", result.domain_created or "N/A")
+        domain_table.add_row(
+            "Name Servers",
+            ", ".join(result.nameservers[:2]) if result.nameservers else "N/A",
+        )
+        domain_table.add_row(
+            "WHOIS Emails",
+            ", ".join(result.whois_emails) if result.whois_emails else "None found",
+        )
+        console.print(Panel(domain_table, title="Domain Intelligence", border_style="blue"))
+
+    # 5. Subdomains
+    if result.subdomains:
+        max_show = 20
+        display_subs = result.subdomains[:max_show]
+        sub_table = Table(
+            title=f"Subdomains ({len(result.subdomains)} found)",
+            box=rich_box.ROUNDED,
+            show_header=True,
+            padding=(0, 1),
+        )
+        sub_table.add_column("Hostname", style="cyan", min_width=30)
+        for sub in display_subs:
+            sub_table.add_row(sub)
+        if len(result.subdomains) > max_show:
+            remaining = len(result.subdomains) - max_show
+            sub_table.add_row(f"... and {remaining} more")
+        console.print(sub_table)
+
+    # 6. Breach Intelligence
+    if result.paste_hits > 0:
+        breach_table = Table(box=rich_box.ROUNDED, show_header=False, padding=(0, 1))
+        breach_table.add_column("Field", style="bold", min_width=16)
+        breach_table.add_column("Value", min_width=30)
+        breach_table.add_row("Paste Hits", str(result.paste_hits))
+        breach_table.add_row(
+            "Sources",
+            ", ".join(result.paste_sources[:5]) if result.paste_sources else "N/A",
+        )
+        console.print(Panel(breach_table, title="Breach Intelligence", border_style="yellow"))
+
+    # 7. OSINT Links
+    if result.dork_urls:
+        console.print(Panel(
+            f"Run 'dragonflyx dorks {result.target}' to view all links",
+            title=f"OSINT Dork Links ({len(result.dork_urls)} generated)",
+            border_style="cyan",
+        ))
+
+    # 8. Errors
+    if result.errors:
+        console.print()
+        for key, value in result.errors.items():
+            console.print(f"  [dim red]Error ({key}): {value}[/dim red]")
+
+    # 9. Footer
+    overall_risk = result.overall_risk
+    console.print(f"\n  Overall Risk: [{risk_style}]{overall_risk.upper()}[/{risk_style}]\n")

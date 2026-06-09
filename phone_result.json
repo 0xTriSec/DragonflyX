@@ -1,0 +1,19 @@
+{
+  "phone_number": "+8490xxxxxxx",
+  "formatted_e164": "+84909999999",
+  "formatted_national": "0909 999 999",
+  "country_code": "VN",
+  "country_name": "Vietnam",
+  "carrier": "MobiFone",
+  "line_type": "mobile",
+  "is_valid": true,
+  "is_possible": true,
+  "query_time": "2026-06-09T04:55:48.844601Z",
+  "cached": true,
+  "errors": [],
+  "_meta": {
+    "tool": "DragonflyX",
+    "version": "3.0.0",
+    "generated_at": "2026-06-09T04:55:53.967841+00:00"
+  }
+}

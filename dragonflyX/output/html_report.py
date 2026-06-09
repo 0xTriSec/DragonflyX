@@ -460,7 +460,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </div>
     <div class="header-meta-item">
       <span class="header-meta-label">Tool</span>
-      <span class="header-meta-value">DragonflyX v2.0.0</span>
+      <span class="header-meta-value">DragonflyX v3.0.0</span>
     </div>
   </div>
 </header>
@@ -779,7 +779,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 <!-- FOOTER -->
 <footer class="report-footer">
-  <strong>DragonflyX v2.0.0</strong> &mdash; OSINT &amp; SOC Intelligence Tool &mdash; Generated {{ generated_at }}
+  <strong>DragonflyX v3.0.0</strong> &mdash; OSINT &amp; SOC Intelligence Tool &mdash; Generated {{ generated_at }}
 </footer>
 
 </body>
